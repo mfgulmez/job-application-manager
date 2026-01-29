@@ -2,7 +2,7 @@
 
 ## 📖 Project Overview
 
-The **Job Application Manager** is a comprehensive full-stack solution designed to streamline the job search and application tracking process. It features a centralized dashboard for managing applications and a browser extension, **Job Manager Co-Pilot**, which automates the extraction of job details from major platforms like LinkedIn, Indeed, and Glassdoor.
+The **Job Application Manager** is a comprehensive full-stack solution designed to streamline the job search and application tracking process. It features a centralized dashboard for managing applications and a browser extension, **Job Manager Co-Pilot**, which automates the extraction of job details from major platforms like LinkedIn and Indeed,.
 
 The system is built on a microservices-ready architecture and is fully containerized with Docker for consistent deployment.
 
@@ -34,9 +34,7 @@ A Chrome Extension (Manifest V3) for scraping job data directly from browser tab
 * **Permissions:** `activeTab`, `scripting`, `storage`
 * **Supported Platforms:**
     * LinkedIn
-    * Indeed (Global & TR)
-    * Glassdoor (Global & TR)
-
+    * Indeed 
 ---
 
 ## 🚀 Installation & Setup
