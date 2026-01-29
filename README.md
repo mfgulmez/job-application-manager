@@ -34,7 +34,8 @@ A Chrome Extension (Manifest V3) for scraping job data directly from browser tab
 * **Permissions:** `activeTab`, `scripting`, `storage`
 * **Supported Platforms:**
     * LinkedIn
-    * Indeed 
+    * Indeed
+      
 ---
 
 ## 🚀 Installation & Setup
