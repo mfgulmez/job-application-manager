@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: job-application-manager
+
+  jpa:
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

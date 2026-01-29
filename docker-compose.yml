@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: jobmanager-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jobmanager
+      POSTGRES_USER: jobmanager_user
+      POSTGRES_PASSWORD: jobmanager_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobmanager_user -d jobmanager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./jobmanager-backend
+      dockerfile: Dockerfile
+    container_name: jobmanager-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobmanager
+      SPRING_DATASOURCE_USERNAME: jobmanager_user
+      SPRING_DATASOURCE_PASSWORD: jobmanager_pass
+    # We remove the port mapping (8080) because only Nginx needs to talk to it internally!
+    # But for debugging, you can keep "8080:8080" if you still want direct API access.
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./jobmanager-frontend
+      dockerfile: Dockerfile
+    container_name: jobmanager-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80" # Opens the app on localhost (no port needed in browser)
+
+volumes:
+  postgres_data:

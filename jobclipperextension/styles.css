@@ -1,0 +1,52 @@
+/* Base Button Style */
+.jm-tracker-btn {
+    border: none;
+    border-radius: 20px; /* Pill shape is friendlier */
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+    outline: none;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
+}
+
+.jm-tracker-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* STATE 1: UNTRACKED (Blue Action) */
+.jm-state-untracked {
+    background-color: #0a66c2; /* LinkedIn Blue */
+    color: white;
+}
+.jm-state-untracked:hover {
+    background-color: #004182;
+}
+
+/* STATE 2: DRAFT (Yellow/Warning - Needs Action) */
+.jm-state-draft {
+    background-color: #fff3cd; /* Light Yellow */
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+.jm-state-draft:hover {
+    background-color: #ffe8a1;
+    content: "Mark Applied?"; /* Advanced trick: You could change text on hover if you wanted */
+}
+
+/* STATE 3: APPLIED (Green Success) */
+.jm-state-applied {
+    background-color: #d4edda; /* Light Green */
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    cursor: default; /* Make it feel final */
+}
+
+/* Top Pick Highlight */
+.jm-top-pick {
+    border: 3px solid #ffc107 !important;
+    background-color: #fff9db !important;
+}

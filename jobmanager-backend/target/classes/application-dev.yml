@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jobmanager
+    username: jobmanager_user
+    password: jobmanager_pass

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { width: 280px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; text-align: center; }
+    h3 { margin-top: 0; color: #333; }
+    
+    select {
+      width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;
+    }
+
+    button { 
+      background: #007bff; color: white; border: none; 
+      padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 14px;
+    }
+    button:hover { background: #0056b3; }
+    
+    #status { margin-top: 10px; font-size: 12px; min-height: 20px; }
+    .success { color: green; font-weight: bold; }
+    .error { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h3>Job Manager</h3>
+  
+  <select id="statusSelect">
+    <option value="DRAFT">Draft (Save for later)</option>
+    <option value="APPLIED">✅ Applied</option>
+  </select>
+
+  <button id="saveBtn">📥 Save to Manager</button>
+  
+  <div id="status"></div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
