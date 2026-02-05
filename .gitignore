@@ -1,0 +1,46 @@
+# --- IDEs & Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- OS System Files ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Environment Variables (Sensitive Data) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Java / Spring Boot (Backend) ---
+jobmanager-backend/target/
+jobmanager-backend/**/*.class
+*.jar
+*.war
+*.ear
+# Ignore Maven wrapper if you prefer
+# .mvn/
+# mvnw
+# mvnw.cmd
+
+# --- Node.js / React (Frontend) ---
+jobmanager-frontend/node_modules/
+jobmanager-frontend/dist/
+jobmanager-frontend/build/
+jobmanager-frontend/coverage/
+
+# --- Extension (If applicable) ---
+# If your extension has node_modules or build artifacts
+jobclipperextension/node_modules/
+jobclipperextension/dist/
