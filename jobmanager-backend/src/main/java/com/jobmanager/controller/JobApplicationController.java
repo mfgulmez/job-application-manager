@@ -1,6 +1,5 @@
 package com.jobmanager.controller;
-
-import com.jobmanager.model.ApplicationStatus; // Import your Enum
+import com.jobmanager.model.ApplicationStatus; 
 import com.jobmanager.model.Company;
 import com.jobmanager.model.JobApplication;
 import com.jobmanager.model.Platform;
@@ -37,36 +36,42 @@ public class JobApplicationController {
 
     @PostMapping
     public JobApplication createApplication(@RequestBody CreateApplicationRequest request) {
-        // Convert DTO to Entity
+        ApplicationStatus incomingStatus = ApplicationStatus.DRAFT;
+        if (request.getStatus() != null) {
+            try {
+                // Ensure uppercase to prevent enum errors!
+                incomingStatus = ApplicationStatus.valueOf(request.getStatus().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                incomingStatus = ApplicationStatus.DRAFT;
+            }
+        }
+
+        // 2. UPSERT LOGIC: Check if this job already exists in the database
+        JobApplication existingApp = service.findByUrl(request.getJobUrl());
+        
+        if (existingApp != null) {
+            // If it exists, update the status of the existing record instead of duplicating
+            return service.updateStatus(existingApp.getId(), incomingStatus);
+        }
+
+        // 3. If it does NOT exist, proceed with creating a brand new record
         JobApplication app = new JobApplication();
         app.setJobTitle(request.getJobTitle());
         app.setJobUrl(request.getJobUrl());
         
-        // Build transient Company
         Company company = Company.builder()
                 .name(request.getCompanyName())
                 .build();
         app.setCompany(company);
 
-        // Build transient Platform (if provided)
         if (request.getPlatformName() != null) {
             Platform platform = Platform.builder()
                     .name(request.getPlatformName())
                     .build();
             app.setPlatform(platform);
         }
-        // ✅ NEW: Handle Status
-        if (request.getStatus() != null) {
-            try {
-                // Convert string "DRAFT" to Enum ApplicationStatus.DRAFT
-                app.setStatus(com.jobmanager.model.ApplicationStatus.valueOf(request.getStatus()));
-            } catch (IllegalArgumentException e) {
-                // Fallback if invalid status sent
-                app.setStatus(com.jobmanager.model.ApplicationStatus.DRAFT);
-            }
-        } else {
-            app.setStatus(com.jobmanager.model.ApplicationStatus.DRAFT); // Default for imports
-        }
+        
+        app.setStatus(incomingStatus);
 
         return service.createApplication(app);
     }

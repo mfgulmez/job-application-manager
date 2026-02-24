@@ -79,8 +79,8 @@ public class GenericWebAdapter implements PlatformAdapter {
 
         return JobApplication.builder()
                 .jobUrl(url)
-                .company(company)   // ✅ Set Company
-                .platform(platform) // ✅ Set Smart Platform
+                .company(company)   
+                .platform(platform) 
                 .jobTitle(position)
                 .status(ApplicationStatus.DRAFT)
                 .build();

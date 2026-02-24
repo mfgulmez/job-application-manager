@@ -29,8 +29,8 @@ public class LinkedInAdapter implements PlatformAdapter {
 
         return JobApplication.builder()
                 .jobUrl(url)
-                .platform(platform) // ✅ Explicitly set Platform
-                .company(company)   // ✅ Explicitly set Company
+                .platform(platform) 
+                .company(company)  
                 .jobTitle("LinkedIn Job")
                 .status(ApplicationStatus.APPLIED)
                 .build();

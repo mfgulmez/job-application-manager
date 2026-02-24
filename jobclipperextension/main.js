@@ -28,6 +28,25 @@ function getJobId(url) {
     return null;
 }
 
+function getCanonicalUrl(url) {
+    const jobId = getJobId(url);
+    if (!jobId) {
+        try {
+            const u = new URL(url);
+            return u.origin + u.pathname; // Fallback: strip query params
+        } catch(e) { return url; }
+    }
+    
+    // Always return a clean, exact matching URL format
+    if (url.includes("linkedin.com")) {
+        return `https://www.linkedin.com/jobs/view/${jobId}/`;
+    }
+    if (url.includes("indeed.com")) {
+        return `https://www.indeed.com/viewjob?jk=${jobId}`;
+    }
+    return url;
+}
+
 // --- GLOBAL POLLER ---
 setInterval(runBatchScanner, 500); 
 
@@ -79,6 +98,7 @@ async function runBatchScanner() {
 
         const info = extractInfo(item.element, platform, isDetail);
         if (isDetail && windowJobId) info.url = window.location.href; 
+        info.url = getCanonicalUrl(info.url);
 
         if (statusCache.has(effectiveJobId)) {
             injectButtons(item.element, info, platform, statusCache.get(effectiveJobId), isDetail, effectiveJobId);
@@ -134,7 +154,7 @@ function findFallbackTarget() {
     return null;
 }
 
-function performVisualAudit(item, platform) {
+async function performVisualAudit(item, platform) {
     const btn = item.element.querySelector(".jm-tracker-btn");
     // If we've already synced this as APPLIED, skip
     if (!btn || btn.dataset.state === "APPLIED") return;
@@ -148,9 +168,30 @@ function performVisualAudit(item, platform) {
     }
 
     const modal = document.querySelector(".artdeco-modal") || document.querySelector(".ip-Modal");
-    if (checkForSuccessText(scope, false) || (modal && checkForSuccessText(modal, true))) {
-        // Use global sync
-        if (btn.dataset.jobId) updateGlobalState(btn.dataset.jobId, "APPLIED");
+    
+    // 1. Check for success text strictly inside this specific job's card/scope
+    let isApplied = checkForSuccessText(scope, false);
+    
+    // 2. ONLY check the global modal if THIS item is the detail view (the one you are actually applying to)
+    if (!isApplied && item.type === 'DETAIL' && modal) {
+        isApplied = checkForSuccessText(modal, true);
+    }
+
+    if (isApplied) {
+        if (btn.dataset.jobId) {
+            // Update UI globally immediately
+            updateGlobalState(btn.dataset.jobId, "APPLIED");
+            
+            // 3. Extract info and actually SEND the update to your Spring Boot Backend!
+            const info = extractInfo(item.element, platform, item.type === 'DETAIL');
+            if (item.type === 'DETAIL') info.url = window.location.href;
+            info.url = getCanonicalUrl(info.url);
+            try {
+                await sendData(info, "APPLIED");
+            } catch (error) {
+                console.error("Job Manager: Failed to sync APPLIED state to backend", error);
+            }
+        }
     }
 }
 
@@ -208,7 +249,7 @@ function injectButtons(element, info, platform, initialState, isDetailView, jobI
         const freshInfo = extractInfo(element, platform, isDetailView);
         if (isDetailView) freshInfo.url = window.location.href;
         const finalInfo = (freshInfo.title && freshInfo.title !== "Unknown") ? freshInfo : info;
-
+        finalInfo.url = getCanonicalUrl(finalInfo.url);
         if (btnTrack.dataset.state === "UNTRACKED") {
             // Set Loading VISUALLY on this button immediately for feedback
             setVisuals(btnTrack, "LOADING", btnPrep, null, isDetailView);

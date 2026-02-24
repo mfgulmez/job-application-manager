@@ -18,12 +18,13 @@ export async function sendApplicationData(info, status) {
     const res = await fetch(API_BASE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+
         body: JSON.stringify({ 
             jobTitle: info.title, 
             companyName: info.company, 
             jobUrl: info.url, 
             platformName: pName, 
-            status: status 
+            status: status.toUpperCase() 
         })
     });
     return res.ok;
