@@ -1,1 +1,17 @@
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\adapter\GenericWebAdapter.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\adapter\LinkedInAdapter.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\adapter\PlatformAdapter.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\controller\JobApplicationController.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\dto\ApplicationStats.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\dto\CreateApplicationRequest.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\dto\GeneratorRequest.java
 C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\JobManagerApplication.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\model\ApplicationStatus.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\model\Company.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\model\JobApplication.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\model\Platform.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\repository\CompanyRepository.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\repository\JobApplicationRepository.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\repository\PlatformRepository.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\service\ApplicationFlowResolver.java
+C:\Users\mfgul\job application manager\jobmanager-backend\src\main\java\com\jobmanager\service\JobApplicationService.java
