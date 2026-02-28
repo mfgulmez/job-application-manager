@@ -8,6 +8,7 @@ import {
 console.log("Job Manager Co-Pilot: SYNC SYSTEM ACTIVATED 🔄");
 
 const statusCache = new Map(); 
+const spyAttachedSet = new WeakSet();
 
 // --- HELPER: Get Job ID ---
 function getJobId(url) {
@@ -71,7 +72,14 @@ async function runBatchScanner() {
 
     items.forEach(item => {
         const isDetail = item.type === 'DETAIL';
-        
+        const isStandalonePage = window.location.pathname.includes("/jobs/view/") || 
+        window.location.pathname.includes("/viewjob");
+
+        // 🛡️ THE NEW RULE: If it's a Detail View but NOT a Standalone page 
+        // (e.g., the right side of Recommended Jobs), skip it completely!
+        if (isDetail && !isStandalonePage) {
+            return; 
+        }
         let effectiveJobId = null;
         if (isDetail) {
              effectiveJobId = windowJobId;
@@ -143,6 +151,7 @@ function updateGlobalState(jobId, newState) {
 
 function findFallbackTarget() {
     const candidates = [
+        ".scaffold-layout__main", "main",
         ".jobs-details__main-content", ".jobs-search__job-details", 
         ".scaffold-layout__detail", ".job-view-layout",
         "#viewJob-container", ".jobsearch-JobComponent", ".jobsearch-ViewJobLayout"
@@ -156,7 +165,6 @@ function findFallbackTarget() {
 
 async function performVisualAudit(item, platform) {
     const btn = item.element.querySelector(".jm-tracker-btn");
-    // If we've already synced this as APPLIED, skip
     if (!btn || btn.dataset.state === "APPLIED") return;
 
     let scope = item.element;
@@ -168,28 +176,45 @@ async function performVisualAudit(item, platform) {
     }
 
     const modal = document.querySelector(".artdeco-modal") || document.querySelector(".ip-Modal");
-    
-    // 1. Check for success text strictly inside this specific job's card/scope
     let isApplied = checkForSuccessText(scope, false);
     
-    // 2. ONLY check the global modal if THIS item is the detail view (the one you are actually applying to)
-    if (!isApplied && item.type === 'DETAIL' && modal) {
+    // 🛡️ THE FIX: Connect the success modal to the currently active job!
+    // If this list card's ID matches the active job ID in the URL, it claims the success.
+    const windowJobId = getJobId(window.location.href);
+    const isActiveJob = (item.type === 'DETAIL' || btn.dataset.jobId === windowJobId);
+
+    if (!isApplied && isActiveJob && modal) {
         isApplied = checkForSuccessText(modal, true);
+    }
+
+    // Safely read the native button text on the Standalone page
+    if (!isApplied && item.type === 'DETAIL') {
+        const nativeBtns = item.element.querySelectorAll(".jobs-apply-button span.artdeco-button__text, .jobs-apply-button--top-card span.artdeco-button__text");
+        for (const span of nativeBtns) {
+            if (span.innerText.trim() === "Applied") {
+                isApplied = true;
+                break;
+            }
+        }
+        const banner = item.element.querySelector(".artdeco-inline-feedback--success");
+        if (banner && banner.innerText.toLowerCase().includes("applied")) {
+            isApplied = true;
+        }
     }
 
     if (isApplied) {
         if (btn.dataset.jobId) {
-            // Update UI globally immediately
             updateGlobalState(btn.dataset.jobId, "APPLIED");
             
-            // 3. Extract info and actually SEND the update to your Spring Boot Backend!
             const info = extractInfo(item.element, platform, item.type === 'DETAIL');
             if (item.type === 'DETAIL') info.url = window.location.href;
-            info.url = getCanonicalUrl(info.url);
+            if (typeof getCanonicalUrl === 'function') info.url = getCanonicalUrl(info.url);
+            
             try {
-                await sendData(info, "APPLIED");
+                // This now securely sends through background.js!
+                await sendData(info, "APPLIED"); 
             } catch (error) {
-                console.error("Job Manager: Failed to sync APPLIED state to backend", error);
+                console.error("Job Manager: Failed to sync APPLIED state", error);
             }
         }
     }
@@ -209,7 +234,7 @@ function injectButtons(element, info, platform, initialState, isDetailView, jobI
             container.style.cssText = "position:absolute; top:0px; right:0px; z-index:99999; display:flex; gap:10px; background:rgba(255,255,255,0.9); padding:4px; border-radius:8px;";
         } else {
             // LinkedIn Default Position
-            container.style.cssText = "position:absolute; top:0px; right:100px; z-index:99999; display:flex; gap:10px; background:rgba(255,255,255,0.9); padding:4px; border-radius:8px;";
+            container.style.cssText = "position:absolute; top:70px; right:24px; z-index:999999; display:flex; gap:10px; background:rgba(255,255,255,0.95); padding:6px; border-radius:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);";
         }
     } else {
         container.style.cssText = platform === PLATFORMS.INDEED 
@@ -334,13 +359,18 @@ function showPreviewPanel(text) {
     document.body.appendChild(panel);
 }
 
+// 🛡️ THE FIX: Event Delegation prevents React Hydration Errors and catches lazy-loaded buttons
+let spyInitialized = false;
 function setupApplySpy(platform) {
-    const btns = document.querySelectorAll(platform.selectors.applyBtns.join(", "));
-    btns.forEach(btn => {
-        if (btn.dataset.jmSpyAttached) return;
-        btn.dataset.jmSpyAttached = "true";
-        btn.addEventListener("click", () => startAggressiveCheck());
-    });
+    if (spyInitialized) return;
+    spyInitialized = true;
+    
+    document.body.addEventListener("click", (e) => {
+        const isApplyBtn = e.target.closest(platform.selectors.applyBtns.join(", "));
+        if (isApplyBtn) {
+            startAggressiveCheck();
+        }
+    }, true); // 'true' ensures React cannot block our listener
 }
 
 function startAggressiveCheck() {
@@ -348,16 +378,32 @@ function startAggressiveCheck() {
     const interval = setInterval(() => {
         checks++;
         if (checks > 30) clearInterval(interval);
+        
+        let isSuccess = false;
         const modal = document.querySelector(".artdeco-modal") || document.querySelector(".ip-Modal");
         if (modal && checkForSuccessText(modal, true)) {
+             isSuccess = true;
+        }
+
+        // 🛡️ THE FIX: Ensure the timer watches the native button on the Standalone page
+        if (!isSuccess && window.location.pathname.includes("/jobs/view/")) {
+            const nativeBtns = document.querySelectorAll(".jobs-apply-button span.artdeco-button__text, .jobs-apply-button--top-card span.artdeco-button__text");
+            for (const span of nativeBtns) {
+                if (span.innerText.trim() === "Applied") {
+                    isSuccess = true;
+                    break;
+                }
+            }
+            const banner = document.querySelector(".artdeco-inline-feedback--success");
+            if (banner && banner.innerText.toLowerCase().includes("applied")) {
+                isSuccess = true;
+            }
+        }
+
+        if (isSuccess) {
              statusCache.clear(); 
              runBatchScanner();
              clearInterval(interval);
-        }
-        if (checkForSuccessText(document.body, false)) {
-            statusCache.clear();
-            runBatchScanner();
-            clearInterval(interval);
         }
     }, 1000);
 }

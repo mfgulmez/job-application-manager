@@ -13,7 +13,7 @@ export const PLATFORMS = {
     LINKEDIN: {
         domain: "linkedin.com",
         selectors: {
-            listCard: [".job-card-container", ".jobs-search-results__list-item", "li.jobs-search-results__list-item"],
+            listCard: [".scaffold-layout__main", ".job-card-container", ".jobs-search-results__list-item", "li.jobs-search-results__list-item"],
             detailHeader: [".job-details-jobs-unified-top-card", ".jobs-unified-top-card", ".jobs-details-top-card", ".jobs-details__main-content", ".job-view-layout"],
             scanAreaDetail: [".jobs-search__job-details", ".job-view-layout", ".artdeco-modal", ".jobs-details__main-content"], 
             applyBtns: [".jobs-apply-button", ".jobs-apply-button--top-card", "button[aria-label*='Apply']"],
