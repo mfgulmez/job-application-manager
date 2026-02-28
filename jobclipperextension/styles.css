@@ -1,7 +1,17 @@
-/* Base Button Style */
+/**
+ * @file This stylesheet defines the visual appearance of the UI elements, primarily the tracking buttons,
+ * that are injected into job portal pages by the content script. The styles are designed to be
+ * clean, non-intrusive, and state-aware.
+ */
+
+/* 
+ * Base style for the main tracking button.
+ * This provides a consistent look and feel across all states.
+ * It's designed to be a friendly, pill-shaped button with a subtle shadow.
+ */
 .jm-tracker-btn {
     border: none;
-    border-radius: 20px; /* Pill shape is friendlier */
+    border-radius: 20px;
     padding: 6px 14px;
     font-size: 13px;
     font-weight: 600;
@@ -12,40 +22,56 @@
     font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
 }
 
+/* A simple hover effect to provide visual feedback to the user. */
 .jm-tracker-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* STATE 1: UNTRACKED (Blue Action) */
-.jm-state-untracked {
+/* 
+ * STATE: UNTRACKED
+ * The default state for a job that has not been saved yet.
+ * A clear call-to-action style.
+ */
+.jm-tracker-btn[data-state="UNTRACKED"] {
     background-color: #0a66c2; /* LinkedIn Blue */
     color: white;
 }
-.jm-state-untracked:hover {
+.jm-tracker-btn[data-state="UNTRACKED"]:hover {
     background-color: #004182;
 }
 
-/* STATE 2: DRAFT (Yellow/Warning - Needs Action) */
-.jm-state-draft {
+/* 
+ * STATE: DRAFT
+ * For jobs that have been saved by the user but not yet marked as "Applied".
+ * The yellow color serves as a visual reminder that an action is pending.
+ */
+.jm-tracker-btn[data-state="DRAFT"] {
     background-color: #fff3cd; /* Light Yellow */
     color: #856404;
     border: 1px solid #ffeeba;
 }
-.jm-state-draft:hover {
+.jm-tracker-btn[data-state="DRAFT"]:hover {
     background-color: #ffe8a1;
-    content: "Mark Applied?"; /* Advanced trick: You could change text on hover if you wanted */
 }
 
-/* STATE 3: APPLIED (Green Success) */
-.jm-state-applied {
+/* 
+ * STATE: APPLIED
+ * The final state for a job that has been successfully applied for.
+ * The green color indicates success, and the cursor is set to default
+ * to signify that no further action is needed.
+ */
+.jm-tracker-btn[data-state="APPLIED"] {
     background-color: #d4edda; /* Light Green */
     color: #155724;
     border: 1px solid #c3e6cb;
-    cursor: default; /* Make it feel final */
+    cursor: default;
 }
 
-/* Top Pick Highlight */
+/* 
+ * A special highlight style for jobs that are identified as a "top pick".
+ * This is currently not implemented in the JS but the style is ready.
+ */
 .jm-top-pick {
     border: 3px solid #ffc107 !important;
     background-color: #fff9db !important;

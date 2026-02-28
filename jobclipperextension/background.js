@@ -1,10 +1,29 @@
-// background.js
+/**
+ * @file background.js
+ * This script acts as the central hub for the Chrome extension, running in the background to handle
+ * communication between the content scripts (and other parts of the extension) and external APIs.
+ * It is responsible for processing data, making API calls, and managing the extension's state.
+ */
+
 const API_BASE = "http://localhost/api/applications";
 
-// Listen for messages from api.js
+/**
+ * Listens for incoming messages from other parts of the extension, such as content scripts.
+ * This is the primary message handler and router for the extension.
+ * It expects messages to have a `type` property to determine the action to take.
+ *
+ * @param {object} request - The message payload sent by the caller.
+ * @param {object} sender - Information about the script that sent the message.
+ * @param {function} sendResponse - A function to call to send a response back to the message sender.
+ * @returns {boolean} - Returns true to indicate that the response will be sent asynchronously.
+ */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     
-    // 1. Handle Saving Job Statuses
+    /**
+     * Handles the "SEND_APPLICATION_DATA" message type.
+     * This action is triggered when a user saves a new job application.
+     * It sends the application data to the backend API to be saved in the database.
+     */
     if (request.type === "SEND_APPLICATION_DATA") {
         fetch(API_BASE, {
             method: "POST",
@@ -23,10 +42,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse({ success: false });
         });
         
-        return true; // Keeps the message channel open for the async response
+        return true; // Indicates an asynchronous response.
     }
 
-    // 2. Handle Batch Status Checks
+    /**
+     * Handles the "FETCH_BATCH_STATUS" message type.
+     * This is used to check the application status for multiple job URLs at once.
+     * It sends a list of URLs to the backend and receives their current statuses.
+     */
     if (request.type === "FETCH_BATCH_STATUS") {
         fetch(`${API_BASE}/check-batch`, {
             method: "POST",
@@ -37,10 +60,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         .then(data => sendResponse({ data }))
         .catch(err => sendResponse({ data: {} }));
         
-        return true;
+        return true; // Indicates an asynchronous response.
     }
 
-    // 3. Handle Cover Letter Generation
+    /**
+     * Handles the "FETCH_COVER_LETTER" message type.
+     * This action is triggered when the user requests to generate a cover letter or other materials.
+     * It sends the job details to a special generation endpoint on the backend.
+     */
     if (request.type === "FETCH_COVER_LETTER") {
         fetch(`${API_BASE}/generate-materials`, {
             method: "POST", 
@@ -55,6 +82,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         .then(data => sendResponse(data))
         .catch(err => sendResponse({ error: err.message }));
 
-        return true;
+        return true; // Indicates an asynchronous response.
     }
 });
